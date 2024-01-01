@@ -16,6 +16,9 @@ public class EmailComponent implements HtmlEmailSender {
   @Inject
   private EmailModule sesEmailSender;
 
+    @Inject
+    private EmailModule mailJetEmailSender;
+
   @Override
   public void send(Email email) throws Exception {
     switch(emailSender) 
@@ -25,7 +28,10 @@ public class EmailComponent implements HtmlEmailSender {
             break; 
         case "ses": 
           sesEmailSender.send(email);
-            break; 
+            break;
+        case "mailjet":
+            mailJetEmailSender.send(email);
+            break;
         default: 
             throw new Exception("No email implementation for " + emailSender); 
     }
@@ -41,7 +47,10 @@ public class EmailComponent implements HtmlEmailSender {
             break; 
         case "ses": 
           sesEmailSender.setEmailConfig(emailConfig);
-            break; 
+            break;
+        case "mailjet":
+            mailJetEmailSender.setEmailConfig(emailConfig);
+            break;
         default: 
  
     }

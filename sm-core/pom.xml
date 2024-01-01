@@ -239,6 +239,12 @@
 			<artifactId>h2</artifactId>
 		</dependency>
 
+		<!-- Mailjet -->
+		<dependency>
+			<groupId>com.mailjet</groupId>
+			<artifactId>mailjet-client</artifactId>
+			<version>4.2.0</version>
+		</dependency>
 	</dependencies>
 	
 

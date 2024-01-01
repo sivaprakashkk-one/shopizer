@@ -1318,7 +1318,7 @@ public class OrderFacadeImpl implements OrderFacade {
 			if(!StringUtils.isBlank(customer.getNick()) && !customer.isAnonymous()) {
 				if(order.getCustomerId() == null && (customerFacade.checkIfUserExists(customer.getNick(), store))) {
 					customer.setAnonymous(true);
-					customer.setNick(null);
+					customer.setNick(customer.getEmailAddress());
 					//send email instructions
 				}
 			}

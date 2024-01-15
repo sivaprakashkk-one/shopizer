@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 
+import com.salesmanager.core.business.services.customer.CustomerService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,9 @@ public class TaxServiceImpl
 	
 	@Inject
 	private TaxClassService taxClassService;
+
+	@Inject
+	private CustomerService customerService;
 	
 	@Override
 	public TaxConfiguration getTaxConfiguration(MerchantStore store) throws ServiceException {
@@ -93,7 +97,13 @@ public class TaxServiceImpl
 		
 
 		if(customer==null) {
-			return null;
+
+			if(orderSummary != null && orderSummary.getProducts() != null && orderSummary.getProducts().get(0).getShoppingCart() != null && orderSummary.getProducts().get(0).getShoppingCart().getCustomerId() != null) {
+				customer = customerService.getById(orderSummary.getProducts().get(0).getShoppingCart().getCustomerId());
+			} else {
+				return null;
+			}
+
 		}
 
 		List<ShoppingCartItem> items = orderSummary.getProducts();
@@ -116,21 +126,21 @@ public class TaxServiceImpl
 		String stateProvince = customer.getBilling().getState();
 		
 		TaxBasisCalculation taxBasisCalculation = taxConfiguration.getTaxBasisCalculation();
-		if(taxBasisCalculation.name().equals(TaxBasisCalculation.SHIPPINGADDRESS)){
+		if(taxBasisCalculation.name().equals(TaxBasisCalculation.SHIPPINGADDRESS.name())){
 			Delivery shipping = customer.getDelivery();
 			if(shipping!=null) {
 				country = shipping.getCountry();
 				zone = shipping.getZone();
 				stateProvince = shipping.getState();
 			}
-		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.BILLINGADDRESS)){
+		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.BILLINGADDRESS.name())){
 			Billing billing = customer.getBilling();
 			if(billing!=null) {
 				country = billing.getCountry();
 				zone = billing.getZone();
 				stateProvince = billing.getState();
 			}
-		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.STOREADDRESS)){
+		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.STOREADDRESS.name())){
 			country = store.getCountry();
 			zone = store.getZone();
 			stateProvince = store.getStorestateprovince();

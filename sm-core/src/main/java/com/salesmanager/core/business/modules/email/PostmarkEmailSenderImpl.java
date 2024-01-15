@@ -62,7 +62,7 @@ public class PostmarkEmailSenderImpl implements EmailModule {
             throw new MailPreparationException("Can't gener ate HTML mail", e);
         }
 
-        ApiClient mailClient = Postmark.getApiClient("05f3c42d-a7d5-4d12-9ead-7110f9b289a1");
+        ApiClient mailClient = Postmark.getApiClient("POSTMARK_SEC");
         Message message = new Message("\"Tire wheel warehouse\" info@twwusa.store", to, subject, htmlWriter.toString(), textWriter.toString());
         message.setMessageStream("outbound");
         MessageResponse response = mailClient.deliverMessage(message);

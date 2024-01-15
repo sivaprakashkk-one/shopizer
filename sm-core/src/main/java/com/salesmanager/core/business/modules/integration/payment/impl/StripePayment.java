@@ -148,6 +148,7 @@ public class StripePayment implements PaymentModule {
 			
 			String strAmount = String.valueOf(amnt);
 			strAmount = strAmount.replace(".","");
+			strAmount = strAmount.replace(",","");
 			
 			Map<String, Object> chargeParams = new HashMap<String, Object>();
 			chargeParams.put("amount", strAmount);
@@ -293,6 +294,7 @@ public class StripePayment implements PaymentModule {
 		
 			String strAmount = String.valueOf(amnt);
 			strAmount = strAmount.replace(".","");
+			strAmount = strAmount.replace(",","");
 			
 			Map<String, Object> chargeParams = new HashMap<String, Object>();
 			chargeParams.put("amount", strAmount);

@@ -245,6 +245,13 @@
 			<artifactId>mailjet-client</artifactId>
 			<version>4.2.0</version>
 		</dependency>
+
+		<!-- Postmark -->
+		<dependency>
+			<groupId>com.postmarkapp</groupId>
+			<artifactId>postmark</artifactId>
+			<version>1.11.0</version>
+		</dependency>
 	</dependencies>
 	
 

@@ -6,6 +6,9 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.salesmanager.core.model.common.Delivery;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -163,7 +166,7 @@ public class OrderTotalApi {
    * @return
    */
   @RequestMapping(
-      value = {"/cart/{code}/total"},
+      value = {"/cart/{code}/totalOld"},
       method = RequestMethod.GET)
   @ResponseBody
   @ApiImplicitParams({
@@ -202,6 +205,80 @@ public class OrderTotalApi {
           new ArrayList<ShoppingCartItem>(shoppingCart.getLineItems());
       orderSummary.setProducts(itemsSet);
 
+      orderTotalSummary = orderService.caculateOrderTotal(orderSummary, merchantStore, language);
+
+      ReadableOrderTotalSummary returnSummary = new ReadableOrderTotalSummary();
+      ReadableOrderSummaryPopulator populator = new ReadableOrderSummaryPopulator();
+      populator.setMessages(messages);
+      populator.setPricingService(pricingService);
+      populator.populate(orderTotalSummary, returnSummary, merchantStore, language);
+
+      return returnSummary;
+
+    } catch (Exception e) {
+      LOGGER.error("Error while calculating order summary", e);
+      try {
+        response.sendError(503, "Error while calculating order summary " + e.getMessage());
+      } catch (Exception ignore) {
+      }
+      return null;
+    }
+  }
+
+  @RequestMapping(
+          value = {"/cart/{code}/total"},
+          method = RequestMethod.GET)
+  @ResponseBody
+  @ApiImplicitParams({
+          @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+          @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
+  })
+  public ReadableOrderTotalSummary calculateTotalForGuest(
+          @PathVariable final String code,
+          @RequestParam(value = "quote", required = false) Long quote,
+          @RequestParam(value = "postalCode", required = false) String postalCode,
+          @RequestParam(value = "zone", required = false) String zone,
+          @ApiIgnore MerchantStore merchantStore,
+          @ApiIgnore Language language,//possible postal code, province and country
+          HttpServletResponse response) {
+
+    try {
+      ShoppingCart shoppingCart = shoppingCartFacade.getShoppingCartModel(code, merchantStore);
+
+      if (shoppingCart == null) {
+
+        response.sendError(404, "Cart code " + code + " does not exist");
+
+        return null;
+      }
+
+      ShippingSummary shippingSummary = null;
+
+      // get shipping quote if asked for
+      if (quote != null) {
+        shippingSummary = shippingQuoteService.getShippingSummary(quote, merchantStore);
+      }
+
+      OrderTotalSummary orderTotalSummary = null;
+
+      OrderSummary orderSummary = new OrderSummary();
+      orderSummary.setShippingSummary(shippingSummary);
+      List<ShoppingCartItem> itemsSet =
+              new ArrayList<ShoppingCartItem>(shoppingCart.getLineItems());
+      orderSummary.setProducts(itemsSet);
+
+      if(StringUtils.isNotBlank(postalCode)) {
+        Delivery addr = new Delivery();
+        addr.setPostalCode(postalCode);
+        addr.setState(zone);
+//        addr.setCountry();
+//        addr.setZone();
+        if(shippingSummary == null) {
+          shippingSummary = new ShippingSummary();
+        }
+        shippingSummary.setDeliveryAddress(addr);
+        orderSummary.setShippingSummary(shippingSummary);
+      }
       orderTotalSummary = orderService.caculateOrderTotal(orderSummary, merchantStore, language);
 
       ReadableOrderTotalSummary returnSummary = new ReadableOrderTotalSummary();

@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import javax.inject.Inject;
 
 import com.salesmanager.core.business.services.customer.CustomerService;
+import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,9 @@ public class TaxServiceImpl
 
 	@Inject
 	private CustomerService customerService;
+
+	@Inject
+	private ZoneService zoneService;
 	
 	@Override
 	public TaxConfiguration getTaxConfiguration(MerchantStore store) throws ServiceException {
@@ -100,6 +104,18 @@ public class TaxServiceImpl
 
 			if(orderSummary != null && orderSummary.getProducts() != null && orderSummary.getProducts().get(0).getShoppingCart() != null && orderSummary.getProducts().get(0).getShoppingCart().getCustomerId() != null) {
 				customer = customerService.getById(orderSummary.getProducts().get(0).getShoppingCart().getCustomerId());
+			} else if (orderSummary != null && orderSummary.getShippingSummary() != null && orderSummary.getShippingSummary().getDeliveryAddress()!=null) {
+				customer = new Customer();
+				customer.setAnonymous(true);
+				String state = orderSummary.getShippingSummary().getDeliveryAddress().getState();
+
+				Zone zone = zoneService.getByCode(state);
+
+				Billing billing = new Billing();
+				billing.setCountry(zone.getCountry());
+				billing.setZone(zone);
+				billing.setState(state);
+				customer.setBilling(billing);
 			} else {
 				return null;
 			}

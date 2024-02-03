@@ -692,13 +692,8 @@ public class OrderFacadeImpl implements OrderFacade {
 			summary.setHandling(quote.getHandlingFees());
 			summary.setShipping(quote.getSelectedShippingOption().getOptionPrice());
 			summary.setShippingOption(quote.getSelectedShippingOption().getOptionName());
-			summary.setShippingOption("name.this");
-//			summary.setShippingModule(quote.getShippingModuleCode());
-			summary.setShippingModule("customQuotesRules");
-
-//			summary.setShippingOptionCode(quote.getSelectedShippingOption().getOptionCode());
-			summary.setShippingOptionCode("customQuotesRules");
-
+			summary.setShippingModule(quote.getShippingModuleCode());
+			summary.setShippingOptionCode(quote.getSelectedShippingOption().getOptionCode());
 
 			if (quote.getDeliveryAddress() != null) {
 				summary.setDeliveryAddress(quote.getDeliveryAddress());
@@ -1192,15 +1187,6 @@ public class OrderFacadeImpl implements OrderFacade {
 
 		ShippingQuote quote = shippingService.getShippingQuote(cart.getId(), store, delivery, shippingProducts,
 				language);
-
-		quote.setHandlingFees(new BigDecimal(2));
-		quote.setDeliveryAddress(delivery);
-		ShippingOption selectedOption = new ShippingOption();
-		selectedOption.setOptionPrice(new BigDecimal(2));
-		selectedOption.setShippingModuleCode("customQuotesRules");
-		List<ShippingOption> shippingOptions = new ArrayList<>();
-		shippingOptions.add(selectedOption);
-		quote.setShippingOptions(shippingOptions);
 		return quote;
 	}
 

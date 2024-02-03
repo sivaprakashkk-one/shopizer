@@ -108,9 +108,7 @@ public class TaxServiceImpl
 				customer = new Customer();
 				customer.setAnonymous(true);
 				String state = orderSummary.getShippingSummary().getDeliveryAddress().getState();
-
 				Zone zone = zoneService.getByCode(state);
-
 				Billing billing = new Billing();
 				billing.setCountry(zone.getCountry());
 				billing.setZone(zone);

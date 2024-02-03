@@ -351,9 +351,6 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         }
 
         //temporary logic for shipping
-        //summary.getProducts().get(0).getProduct().getType()
-
-
         OrderTotal shippingSubTotal = new OrderTotal();
         shippingSubTotal.setModule(Constants.OT_SHIPPING_MODULE_CODE);
         shippingSubTotal.setOrderTotalType(OrderTotalType.SHIPPING);
@@ -362,24 +359,8 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         shippingSubTotal.setSortOrder(100);
         shippingSubTotal.setText(Constants.OT_SHIPPING_MODULE_CODE);
 
-        /*for(ShoppingCartItem item : summary.getProducts()) {
-            shippingSubTotal.setValue(new BigDecimal(99));
-            if (item.getProduct().getType().getId().equals(1L)) {
-                shippingSubTotal.setValue(new BigDecimal(249));
-                break;
-            }
-        }*/
-
         // New logic 99/4/tyre and 279/4/wheel
         BigDecimal tireAndWheelShippingTotal = new BigDecimal(0);
-//        summary.getProducts().stream().map(x -> {
-//            if(x.getProduct().getType().getId().equals(1L)) {
-//                tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(99/4));
-//            } else if (x.getProduct().getType().getId().equals(2L)) {
-//                tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(279/4));
-//            }
-//        });
-
         for(ShoppingCartItem item : summary.getProducts()) {
             if(item.getProduct().getType().getId().equals(1L)) {
                 tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(99f/4f*Float.valueOf(item.getQuantity())));
@@ -387,13 +368,12 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
                 tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(279f/4f*Float.valueOf(item.getQuantity())));
             }
         }
-
         shippingSubTotal.setValue(tireAndWheelShippingTotal);
         // New logic 99/4/tyre and 279/4/wheel Ends here
 
         grandTotal=grandTotal.add(shippingSubTotal.getValue());
         orderTotals.add(shippingSubTotal);
-
+        // temporary logic for shipping ends here
 
         //tax
         List<TaxItem> taxes = taxService.calculateTax(summary, customer, store, language);

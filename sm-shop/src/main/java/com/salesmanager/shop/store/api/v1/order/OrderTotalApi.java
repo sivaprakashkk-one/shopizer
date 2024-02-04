@@ -271,8 +271,6 @@ public class OrderTotalApi {
         Delivery addr = new Delivery();
         addr.setPostalCode(postalCode);
         addr.setState(zone);
-//        addr.setCountry();
-//        addr.setZone();
         if(shippingSummary == null) {
           shippingSummary = new ShippingSummary();
         }

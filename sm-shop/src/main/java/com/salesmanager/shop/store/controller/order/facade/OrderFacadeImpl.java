@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.salesmanager.core.model.shipping.ShippingOption;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;

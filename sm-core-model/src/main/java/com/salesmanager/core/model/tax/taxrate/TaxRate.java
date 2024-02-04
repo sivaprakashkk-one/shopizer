@@ -1,9 +1,9 @@
 /*
- * Licensed to csti consulting 
+ * Licensed to csti consulting
  * You may obtain a copy of the License at
  *
  * http://www.csticonsulting.com
- * Copyright (c) 2006-Aug 24, 2010 Consultation CS-TI inc. 
+ * Copyright (c) 2006-Aug 24, 2010 Consultation CS-TI inc.
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -115,7 +115,10 @@ public class TaxRate  extends SalesManagerEntity<Long, TaxRate> implements Audit
 	
 	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<TaxRate> taxRates = new ArrayList<TaxRate>();
-	
+
+	@OneToMany(mappedBy = "taxRate", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TaxRateZip> taxRateZipcodeMappings;
+
 	@Transient
 	private String rateText;
 	
@@ -248,5 +251,13 @@ public class TaxRate  extends SalesManagerEntity<Long, TaxRate> implements Audit
 
 	public String getCode() {
 		return code;
+	}
+
+	public List<TaxRateZip> getTaxRateZipcodeMappings() {
+		return taxRateZipcodeMappings;
+	}
+
+	public void setTaxRateZipcodeMappings(List<TaxRateZip> taxRateZipcodeMappings) {
+		this.taxRateZipcodeMappings = taxRateZipcodeMappings;
 	}
 }

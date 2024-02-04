@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import com.salesmanager.core.business.services.customer.CustomerService;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
+import com.salesmanager.core.model.tax.taxrate.TaxRateZip;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -113,6 +114,7 @@ public class TaxServiceImpl
 				billing.setCountry(zone.getCountry());
 				billing.setZone(zone);
 				billing.setState(state);
+				billing.setPostalCode(orderSummary.getShippingSummary().getDeliveryAddress().getPostalCode());
 				customer.setBilling(billing);
 			} else {
 				return null;
@@ -138,7 +140,7 @@ public class TaxServiceImpl
 		Country country = customer.getBilling().getCountry();
 		Zone zone = customer.getBilling().getZone();
 		String stateProvince = customer.getBilling().getState();
-		
+		String postalCode = customer.getBilling().getPostalCode();
 		TaxBasisCalculation taxBasisCalculation = taxConfiguration.getTaxBasisCalculation();
 		if(taxBasisCalculation.name().equals(TaxBasisCalculation.SHIPPINGADDRESS.name())){
 			Delivery shipping = customer.getDelivery();
@@ -146,6 +148,7 @@ public class TaxServiceImpl
 				country = shipping.getCountry();
 				zone = shipping.getZone();
 				stateProvince = shipping.getState();
+				postalCode = shipping.getPostalCode();
 			}
 		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.BILLINGADDRESS.name())){
 			Billing billing = customer.getBilling();
@@ -153,6 +156,7 @@ public class TaxServiceImpl
 				country = billing.getCountry();
 				zone = billing.getZone();
 				stateProvince = billing.getState();
+				postalCode = billing.getPostalCode();
 			}
 		} else if(taxBasisCalculation.name().equals(TaxBasisCalculation.STOREADDRESS.name())){
 			country = store.getCountry();
@@ -267,7 +271,15 @@ public class TaxServiceImpl
 			for(TaxRate taxRate : taxRates) {
 				
 				double taxRateDouble = taxRate.getTaxRate().doubleValue();//5% ... 8% ...
-				
+				if (!StringUtils.isBlank(postalCode)) {
+					if (taxRate.getTaxRateZipcodeMappings() != null) {
+						List<TaxRateZip> taxRateZipCodeMapping = taxRate.getTaxRateZipcodeMappings();
+						for (TaxRateZip taxRateZip :
+								taxRateZipCodeMapping) {
+							taxRateDouble = taxRateZip.getEstRate().doubleValue();
+						}
+					}
+				}
 
 				if(taxRate.isPiggyback()) {//(compound)
 					if(totalTaxedItemValue.doubleValue()>0) {

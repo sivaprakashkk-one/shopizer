@@ -276,7 +276,11 @@ public class TaxServiceImpl
 						List<TaxRateZip> taxRateZipCodeMapping = taxRate.getTaxRateZipcodeMappings();
 						for (TaxRateZip taxRateZip :
 								taxRateZipCodeMapping) {
-							taxRateDouble = taxRateZip.getEstRate().doubleValue();
+							if(taxRateZip.getCode().equalsIgnoreCase(postalCode)) {
+								taxRateDouble = taxRateZip.getEstRate().doubleValue();
+								break;
+							}
+
 						}
 					}
 				}

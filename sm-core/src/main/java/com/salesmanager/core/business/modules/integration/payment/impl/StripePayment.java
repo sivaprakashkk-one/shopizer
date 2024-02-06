@@ -283,6 +283,20 @@ public class StripePayment implements PaymentModule {
 
 
 		Transaction transaction = new Transaction();
+		// Temporary Logic for COD
+		if(payment.getPaymentType().toString().equalsIgnoreCase("COD")) {
+			transaction.setAmount(amount);
+			//transaction.setOrder(order);
+			transaction.setTransactionDate(new Date());
+			transaction.setTransactionType(TransactionType.AUTHORIZECAPTURE);
+			transaction.setPaymentType(PaymentType.COD);
+			transaction.getTransactionDetails().put("TRANSACTIONID", token);
+			transaction.getTransactionDetails().put("TRNAPPROVED", "COD_PROCESSED");
+			transaction.getTransactionDetails().put("TRNORDERNUMBER", String.valueOf((int)Math.floor(Math.random() * 1000000)));
+			transaction.getTransactionDetails().put("MESSAGETEXT", null);
+			return transaction;
+		}
+
 		try {
 			
 			String amnt = productPriceUtils.getAdminFormatedAmount(store, amount);

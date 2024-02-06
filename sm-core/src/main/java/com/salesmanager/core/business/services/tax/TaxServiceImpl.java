@@ -2,12 +2,8 @@ package com.salesmanager.core.business.services.tax;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -271,18 +267,25 @@ public class TaxServiceImpl
 			for(TaxRate taxRate : taxRates) {
 				
 				double taxRateDouble = taxRate.getTaxRate().doubleValue();//5% ... 8% ...
-				if (!StringUtils.isBlank(postalCode)) {
-					if (taxRate.getTaxRateZipcodeMappings() != null) {
-						List<TaxRateZip> taxRateZipCodeMapping = taxRate.getTaxRateZipcodeMappings();
-						for (TaxRateZip taxRateZip :
-								taxRateZipCodeMapping) {
-							if(taxRateZip.getCode().equalsIgnoreCase(postalCode)) {
-								taxRateDouble = taxRateZip.getEstRate().doubleValue();
-								break;
-							}
+				if (!StringUtils.isBlank(postalCode) && taxRate.getTaxRateZipcodeMappings() != null) {
+					String code = postalCode;
 
-						}
+					Optional<Double> values = taxRate.getTaxRateZipcodeMappings().stream()
+							.filter(x -> x.getCode().equalsIgnoreCase(code))
+							.map(value -> value.getEstRate().doubleValue())
+							.findFirst();
+
+					if (values.isPresent()) {
+						taxRateDouble = values.get();
 					}
+					/*for (TaxRateZip taxRateZip :
+							taxRateZipCodeMapping) {
+						if(taxRateZip.getCode().equalsIgnoreCase(postalCode)) {
+							taxRateDouble = taxRateZip.getEstRate().doubleValue();
+							break;
+						}
+
+					}*/
 				}
 
 				if(taxRate.isPiggyback()) {//(compound)

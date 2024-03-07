@@ -295,6 +295,28 @@ public class StripePayment implements PaymentModule {
 			transaction.getTransactionDetails().put("TRNORDERNUMBER", String.valueOf((int)Math.floor(Math.random() * 1000000)));
 			transaction.getTransactionDetails().put("MESSAGETEXT", null);
 			return transaction;
+		} else if(payment.getPaymentType().toString().equalsIgnoreCase("ACIMA")) {
+			transaction.setAmount(amount);
+			//transaction.setOrder(order);
+			transaction.setTransactionDate(new Date());
+			transaction.setTransactionType(TransactionType.AUTHORIZECAPTURE);
+			transaction.setPaymentType(PaymentType.ACIMA);
+			transaction.getTransactionDetails().put("TRANSACTIONID", token);
+			transaction.getTransactionDetails().put("TRNAPPROVED", "ACIMA_PROCESSED");
+			transaction.getTransactionDetails().put("TRNORDERNUMBER", String.valueOf((int)Math.floor(Math.random() * 1000000)));
+			transaction.getTransactionDetails().put("MESSAGETEXT", null);
+			return transaction;
+		} else if(payment.getPaymentType().toString().equalsIgnoreCase("CONVERGE")) {
+			transaction.setAmount(amount);
+			//transaction.setOrder(order);
+			transaction.setTransactionDate(new Date());
+			transaction.setTransactionType(TransactionType.AUTHORIZECAPTURE);
+			transaction.setPaymentType(PaymentType.CONVERGE);
+			transaction.getTransactionDetails().put("TRANSACTIONID", token);
+			transaction.getTransactionDetails().put("TRNAPPROVED", "CONVERGE_PROCESSED");
+			transaction.getTransactionDetails().put("TRNORDERNUMBER", String.valueOf((int)Math.floor(Math.random() * 1000000)));
+			transaction.getTransactionDetails().put("MESSAGETEXT", null);
+			return transaction;
 		}
 
 		try {

@@ -408,9 +408,14 @@ public class OrderApi {
 			@PathVariable final String code,//shopping cart
 			@Valid @RequestBody PersistableAnonymousOrder order,//order
 			@ApiIgnore MerchantStore merchantStore,
-			@ApiIgnore Language language) {
+			@ApiIgnore Language language, HttpServletRequest request) {
 
 		Validate.notNull(order.getCustomer(), "Customer must not be null");
+
+		boolean ipCheckPassed = orderFacade.ipCheckForCheckout(request, order.getPayment().getPaymentType());
+		if(!ipCheckPassed) {
+			throw new ServiceRuntimeException("Error during checkout [ Did not pass IP Check]", "");
+		}
 
 
 		ShoppingCart cart;

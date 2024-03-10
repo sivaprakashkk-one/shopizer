@@ -19,7 +19,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
+import com.salesmanager.core.business.services.system.SystemConfigurationService;
+import com.salesmanager.core.model.system.SystemConfiguration;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -143,6 +146,10 @@ public class OrderFacadeImpl implements OrderFacade {
 	private CountryService countryService;
 	@Inject
 	private ZoneService zoneService;
+
+	@Inject
+	private SystemConfigurationService systemConfigService;
+
 
 
 	@Autowired
@@ -1644,5 +1651,31 @@ public class OrderFacadeImpl implements OrderFacade {
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public boolean ipCheckForCheckout(HttpServletRequest request, String paymentType) {
+		if(paymentType.equalsIgnoreCase(PaymentType.CREDITCARD.name())) {
+			return true;
+		}
+		if(request !=null && request.getHeader("ip")!= null) {
+			String clientIP = request.getHeader("ip");
+			try {
+				SystemConfiguration allowedIPProperty = systemConfigService.getByKey("ALLOWED_PAYMENT_IP");
+				org.jsoup.helper.Validate.notNull(allowedIPProperty, "Allowed IPs for payment in config must not be null");
+				org.jsoup.helper.Validate.notNull(allowedIPProperty.getValue(), "Allowed IPs for payment in config must not be null");
+				org.jsoup.helper.Validate.notNull(clientIP, "Client IP for payment must not be null");
+				if(allowedIPProperty.getValue().equalsIgnoreCase("*") || allowedIPProperty.getValue().contains(clientIP)) {
+					// Do nothing since the IP is allowed to proceed further
+					return true;
+				} else {
+					throw new ServiceRuntimeException("Customer with IP [" + clientIP + "] is not allowed to proceed with payment", clientIP);
+				}
+			} catch (ServiceException e) {
+				throw new ServiceRuntimeException("Error during checkout [" + e.getMessage() + "]", e);
+			}
+		} else {
+			throw new ServiceRuntimeException("No Client IP is passed to proceed with payment", "");
+		}
 	}
 }

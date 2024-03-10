@@ -27,6 +27,8 @@ import com.salesmanager.shop.model.order.history.PersistableOrderStatusHistory;
 import com.salesmanager.shop.model.order.history.ReadableOrderStatusHistory;
 import com.salesmanager.shop.model.order.transaction.ReadableTransaction;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 public interface OrderFacade {
 
@@ -202,4 +204,6 @@ public interface OrderFacade {
 	 * Update Order status and create order_status_history record
 	 */
 	void updateOrderStatus(Order order, OrderStatus newStatus, MerchantStore store);
+
+	boolean ipCheckForCheckout(HttpServletRequest request, String paymentType);
 }

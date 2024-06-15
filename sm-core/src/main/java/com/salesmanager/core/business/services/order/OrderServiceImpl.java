@@ -7,14 +7,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -359,17 +354,23 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
         shippingSubTotal.setSortOrder(100);
         shippingSubTotal.setText(Constants.OT_SHIPPING_MODULE_CODE);
 
-        // New logic 99/4/tyre and 279/4/wheel
-        BigDecimal tireAndWheelShippingTotal = new BigDecimal(0);
-        for(ShoppingCartItem item : summary.getProducts()) {
-            if(item.getProduct().getType().getId().equals(1L)) {
-                tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(99f/4f*Float.valueOf(item.getQuantity())));
-            } else if (item.getProduct().getType().getId().equals(2L)) {
-                tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(new BigDecimal(279f/4f*Float.valueOf(item.getQuantity())));
+        try {
+            shippingConfiguration = shippingService.getShippingConfiguration(store);
+
+            // New logic 99/4/tyre and 279/4/wheel
+            BigDecimal tireAndWheelShippingTotal = new BigDecimal(0);
+            for(ShoppingCartItem item : summary.getProducts()) {
+                if(item.getProduct().getType().getId().equals(1L)) {
+                    tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(calculateCustomPricingForShipping(shippingConfiguration, "TIRE", item.getQuantity()));
+                } else if (item.getProduct().getType().getId().equals(2L)) {
+                    tireAndWheelShippingTotal = tireAndWheelShippingTotal.add(calculateCustomPricingForShipping(shippingConfiguration, "WHEEL", item.getQuantity()));
+                }
             }
+            shippingSubTotal.setValue(tireAndWheelShippingTotal);
+            // New logic 99/4/tyre and 279/4/wheel Ends here
+        } catch (Exception ex) {
+            throw new ServiceException(ex);
         }
-        shippingSubTotal.setValue(tireAndWheelShippingTotal);
-        // New logic 99/4/tyre and 279/4/wheel Ends here
 
         grandTotal=grandTotal.add(shippingSubTotal.getValue());
         orderTotals.add(shippingSubTotal);
@@ -420,6 +421,17 @@ public class OrderServiceImpl  extends SalesManagerEntityServiceImpl<Long, Order
 
     }
 
+    private BigDecimal calculateCustomPricingForShipping(ShippingConfiguration shippingConfiguration, String productType, Integer quantity) {
+        Stream<BigDecimal> calculatedShipping = shippingConfiguration.getCustomPricing().stream().filter(x -> x.getProduct().equalsIgnoreCase(productType)).map(y -> {
+            return y.getShippingCostBigDecimal().divide(y.getUnitBigDecimal(), 2, RoundingMode.HALF_EVEN).multiply(new BigDecimal(quantity));
+        });
+        Optional<BigDecimal> firstBigDecimal = calculatedShipping.findFirst();
+        if (firstBigDecimal.isPresent()) {
+            return firstBigDecimal.get();
+        } else {
+            return new BigDecimal("0");
+        }
+    }
 
     @Override
     public OrderTotalSummary caculateOrderTotal(final OrderSummary orderSummary, final Customer customer, final MerchantStore store, final Language language) throws ServiceException {

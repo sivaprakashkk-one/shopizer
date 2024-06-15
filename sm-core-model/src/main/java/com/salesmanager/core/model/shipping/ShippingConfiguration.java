@@ -52,7 +52,10 @@ public class ShippingConfiguration implements JSONAware {
 	//Transient
 	private String orderTotalFreeShippingText = null;
 	private String handlingFeesText = null;
-	
+
+
+	//Custom Shipping
+	private List<CustomPricing> customPricing =  new ArrayList<CustomPricing>();
 	
 	public String getShipType() {
 		return shipType;
@@ -212,7 +215,13 @@ public class ShippingConfiguration implements JSONAware {
 		}
 		
 		data.put("packages", jsonArray);
-		
+
+		JSONArray jsonArrayPricing = new JSONArray();
+		for(CustomPricing c: this.getCustomPricing()) {
+			jsonArrayPricing.add(transformCustomPricing(c));
+		}
+
+		data.put("customPricing", jsonArrayPricing);
 		
 		return data.toJSONString();
 	}
@@ -232,6 +241,15 @@ public class ShippingConfiguration implements JSONAware {
 		return data;
 	}
 
+	private JSONObject transformCustomPricing(CustomPricing c) {
+		JSONObject data = new JSONObject();
+		data.put("product",c.getProduct());
+		data.put("shippingCost",c.getShippingCost());
+		data.put("unit",c.getUnit());
+		data.put("shippingCostBigD",c.getShippingCostBigDecimal());
+		data.put("unitBigD",c.getUnitBigDecimal());
+		return data;
+	}
 
 	public int getBoxWidth() {
 		return boxWidth;
@@ -387,15 +405,13 @@ public class ShippingConfiguration implements JSONAware {
 	}
 
 
+	public List<CustomPricing> getCustomPricing() {
+		return customPricing;
+	}
 
-
-
-
-
-
-
-
-
+	public void setCustomPricing(List<CustomPricing> customPricing) {
+		this.customPricing = customPricing;
+	}
 }
 
 

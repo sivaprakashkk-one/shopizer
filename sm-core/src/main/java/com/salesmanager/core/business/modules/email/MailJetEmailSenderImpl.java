@@ -20,8 +20,8 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component("mailJetEmailSender")
 public class MailJetEmailSenderImpl implements EmailModule {
@@ -44,7 +44,21 @@ public class MailJetEmailSenderImpl implements EmailModule {
         final String subject = email.getSubject();
         final String tmpl = email.getTemplateName();
         final Map<String, String> templateTokens = email.getTemplateTokens();
+        final String bcc = email.getBcc();
+        List<String> finalBcc = new ArrayList<>();
 
+        if(bcc.contains(",")) {
+            finalBcc = Arrays.stream(bcc.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
+
+        JSONArray jsonArrayBCC = new JSONArray();
+        finalBcc.forEach(str -> {
+            JSONObject jsonObject = new JSONObject().put("Email", str)
+                    .put("Name", eml);
+            jsonArrayBCC.put(jsonObject);
+        });
 
         Map<String, String> message = constructHTMLMessage(tmpl, templateTokens);
 
@@ -62,6 +76,7 @@ public class MailJetEmailSenderImpl implements EmailModule {
                                         .put(new JSONObject()
                                                 .put("Email", to)
                                                 .put("Name", templateTokens.get("EMAIL_CUSTOMER_FIRSTNAME"))))
+                                .put(Emailv31.Message.BCC, jsonArrayBCC)
                                 .put(Emailv31.Message.SUBJECT, subject)
                                 .put(Emailv31.Message.TEXTPART, message.get("textPart"))
                                 .put(Emailv31.Message.HTMLPART, message.get("htmlPart"))

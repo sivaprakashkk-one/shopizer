@@ -171,6 +171,11 @@ public class MerchantStore extends SalesManagerEntity<Integer, MerchantStore> im
 	@Column(name = "STORE_EMAIL", length = 60, nullable = false)
 	private String storeEmailAddress;
 
+	@Email
+	@NotEmpty
+	@Column(name = "STORE_BCC_EMAIL", length = 60, nullable = false)
+	private String storeBCCEmailAddress;
+
 	@JsonIgnore
 	@Column(name = "STORE_LOGO", length = 100)
 	private String storeLogo;
@@ -424,4 +429,11 @@ public class MerchantStore extends SalesManagerEntity<Integer, MerchantStore> im
 		this.retailer = retailer;
 	}
 
+	public String getStoreBCCEmailAddress() {
+		return storeBCCEmailAddress;
+	}
+
+	public void setStoreBCCEmailAddress(String storeBCCEmailAddress) {
+		this.storeBCCEmailAddress = storeBCCEmailAddress;
+	}
 }

@@ -248,6 +248,7 @@ public class EmailTemplatesUtils {
 		           email.setTo(toEmail);
 		           email.setTemplateName(EmailConstants.EMAIL_ORDER_TPL);
 		           email.setTemplateTokens(templateTokens);
+				   email.setBcc(merchantStore.getStoreBCCEmailAddress());
 
 		           LOGGER.debug( "Sending email to {} for order id {} ",customer.getEmailAddress(), order.getId() );
 		           emailService.sendHtmlEmail(merchantStore, email);

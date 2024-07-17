@@ -7,12 +7,17 @@ import com.postmarkapp.postmark.client.data.model.message.MessageResponse;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component("postmarkEmailSender")
 public class PostmarkEmailSenderImpl implements EmailModule {
@@ -35,6 +40,14 @@ public class PostmarkEmailSenderImpl implements EmailModule {
         final String subject = email.getSubject();
         final String tmpl = email.getTemplateName();
         final Map<String, String> templateTokens = email.getTemplateTokens();
+        final String bcc = email.getBcc();
+        List<String> finalBcc = new ArrayList<>();
+
+        if(bcc.contains(",")) {
+            finalBcc = Arrays.stream(bcc.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
 
 //        client = new MailjetClient(emailConfig.getUsername(), emailConfig.getPassword(), new ClientOptions("v3.1"));
 
@@ -60,6 +73,14 @@ public class PostmarkEmailSenderImpl implements EmailModule {
 
         ApiClient mailClient = Postmark.getApiClient("POSTMARK_SEC");
         Message message = new Message("\"Tire wheel warehouse\" info@twwusa.store", to, subject, htmlWriter.toString(), textWriter.toString());
+
+        // Set BCC
+        if(!finalBcc.isEmpty()) {
+            message.setBcc(finalBcc);
+        } else if(StringUtils.isNotBlank(bcc)){
+            message.setBcc(bcc);
+        }
+
         message.setMessageStream("outbound");
         MessageResponse response = mailClient.deliverMessage(message);
     }

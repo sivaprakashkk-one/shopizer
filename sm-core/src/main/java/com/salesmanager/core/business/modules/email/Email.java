@@ -16,6 +16,7 @@ public class Email implements Serializable {
 	private String to;
 	private String subject;
 	private String templateName;
+	private String bcc;
 	
 	private Map<String,String> templateTokens = new HashMap<String,String>();
 
@@ -67,4 +68,11 @@ public class Email implements Serializable {
 		return fromEmail;
 	}
 
+	public String getBcc() {
+		return bcc;
+	}
+
+	public void setBcc(String bcc) {
+		this.bcc = bcc;
+	}
 }
